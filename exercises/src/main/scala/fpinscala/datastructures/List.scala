@@ -88,5 +88,68 @@ object List { // `List` companion object. Contains functions for creating and wo
     case Cons(h, t) => foldLeft(t, f(z, h))(f)
   }
 
-  def map[A,B](l: List[A])(f: A => B): List[B] = sys.error("todo")
+  // ex3.11
+  def sum3(as: List[Int]) = foldLeft(as, 0)(_ + _)
+  def product3(as: List[Int]) = foldLeft(as, 1.0)(_ * _)
+
+  // ex3.12
+  def reverse[A](as: List[A]): List[A] =
+    foldLeft(as, List[A]())((acc, h) => Cons(h, acc))
+
+  // ex3.13
+  def foldRight2[A, B](as: List[A], z: B)(f: (A, B) => B): B =
+    foldLeft(reverse(as), z)((x,acc)=>f(acc,x))
+
+  def sum4(as: List[Int]): Int =
+    foldRight2(as, 0)(_+_)
+
+  def foldLeft2[A, B](as: List[A], z: B)(f: (B, A) => B): B =
+    foldRight(reverse(as), z)((acc,x)=>f(x,acc))
+
+  // ex3.14
+  def appendViaFoldLeft[A](a1: List[A], a2: List[A]): List[A] =
+    foldLeft(reverse(a1), a2)((acc, x) => Cons(x, acc))
+
+  // ex3.15
+  def concat[A](l: List[List[A]]): List[A] =
+    foldRight(l, List[A]())(appendViaFoldLeft)
+
+  // ex3.16
+  def addOneEach(as: List[Int]): List[Int] =
+    map[Int, Int](as)(_ + 1)
+
+  // ex3.17
+  def doubleToString(as: List[Double]): List[String] =
+    map[Double, String](as)(_.toString)
+
+  // 3.18
+  def map[A, B](l: List[A])(f: A => B): List[B] =
+    foldRight(l, List[B]())((h, tail) => Cons(f(h), tail))
+
+  // 3.19
+  def filter[A](as: List[A])(f: A => Boolean): List[A] =
+    foldRight(as, List[A]())((h, tail) => {
+      if (f(h)) Cons(h, tail)
+      else tail
+    })
+
+  // 3.20
+  def flatMap[A, B](as: List[A])(f: A => List[B]): List[B] =
+    concat(map(as)(f))
+
+  // 3.21
+  def filterViaFlatMap[A](as: List[A])(f: A => Boolean): List[A] =
+    flatMap(as)(x => if (f(x)) List(x) else Nil)
+
+  // 3.22
+  def addZip(a: List[Int], b: List[Int]): List[Int] =
+    zipWith[Int](a, b)(_ + _)
+
+  // 3.23
+  def zipWith[A](a: List[A], b: List[A])(f: (A, A) => A): List[A] = {
+    (a, b) match {
+      case (Cons(ha, ta), Cons(hb, tb)) => Cons(f(ha, hb), zipWith(ta, tb)(f))
+      case _ => Nil
+    }
+  }
 }
